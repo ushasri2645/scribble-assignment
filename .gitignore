@@ -1,9 +1,6 @@
 ~
 ~
 ~
-final.md
-scope_stale.md
-scope_stale.md.
 node_modules/
 dist/
 build/
@@ -17,12 +14,6 @@ coverage/
 .env.test.local
 .env.production.local
 
-# Spec Kit Rules
-speckit.*
-spec-phase-*.md
-.agents*
-.specify*
-specs/
 ~
 .vscode/
 .vite/
