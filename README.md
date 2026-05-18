@@ -14,6 +14,8 @@ It already provides:
 
 It does not implement the required room and gameplay features from `final.md`. Those are for learners to build in four phases.
 
+The current UI uses drawing-game branding and presentational copy, but the supported behavior is still the scaffold described in this document.
+
 ## Current Implementation
 
 The current branch is scaffold-only.
@@ -21,6 +23,7 @@ The current branch is scaffold-only.
 Implemented today:
 
 - app shell and page routing
+- branded landing page and cleaned starter UI
 - create room flow
 - join room by code flow
 - fetch room snapshot flow
@@ -86,6 +89,7 @@ Use this to confirm the starter works from a clean clone:
 4. Create a room and confirm you land on the Lobby screen.
 5. Open another tab, join the same room, and use the Lobby refresh button to load the latest participant list.
 6. Open the Game screen and confirm the canvas, guess input, scoreboard, and result areas are placeholders only.
+7. Treat any start-page marketing copy as presentational only; use this README for actual supported scope.
 
 ## What Learners Build In Four Phases
 

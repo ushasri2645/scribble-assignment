@@ -25,3 +25,4 @@ spec-phase-*.md
 specs/
 ~
 .vscode/
+.vite/
