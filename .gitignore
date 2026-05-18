@@ -24,3 +24,4 @@ spec-phase-*.md
 .specify*
 specs/
 ~
+.vscode/
