@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Card } from "../components/Card";
+import { PageHeader } from "../components/PageHeader";
 import { useRoomState, useRoomStore } from "../state/roomStore";
 
 export function LobbyPage() {
@@ -29,18 +31,14 @@ export function LobbyPage() {
 
   return (
     <section className="panel placeholder-page">
-      <div className="page-heading">
-        <span className="section-kicker">Room {room.code}</span>
-        <h1>Lobby</h1>
-        <p>
-          This room is available for the scaffolded flow. Open the game screen to inspect the placeholder gameplay
-          areas.
-        </p>
-      </div>
+      <PageHeader
+        kicker={`Room ${room.code}`}
+        title="Lobby"
+        description="This room is available for the scaffolded flow. Open the game screen to inspect the placeholder gameplay areas."
+      />
 
       <div className="summary-grid">
-        <article className="hero__card">
-          <h2>Participants</h2>
+        <Card title="Participants">
           {room.participants.length === 0 ? (
             <p>No participants are connected to this room yet.</p>
           ) : (
@@ -53,16 +51,15 @@ export function LobbyPage() {
               ))}
             </ul>
           )}
-        </article>
+        </Card>
 
-        <article className="hero__card">
-          <h2>Status</h2>
+        <Card title="Status">
           <p className="status-line">{isLoading ? "Refreshing room state..." : "Room endpoint connected"}</p>
           <p>{error ?? refreshError ?? "Game behavior remains scaffolded in this starter."}</p>
-        </article>
+        </Card>
       </div>
 
-      <div className="button-row">
+      <div className="button-row button-row--spread">
         <button className="button button--secondary" disabled={isLoading} onClick={handleRefresh}>
           {isLoading ? "Refreshing..." : "Refresh Room"}
         </button>

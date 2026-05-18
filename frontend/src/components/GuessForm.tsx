@@ -23,7 +23,7 @@ export function GuessForm({ disabled = false }: GuessFormProps) {
           disabled={disabled}
         />
       </label>
-      <div className="button-row">
+      <div className="button-row button-row--compact">
         <button className="button button--primary" type="submit" disabled={disabled}>
           Placeholder Submit
         </button>

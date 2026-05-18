@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { PageHeader } from "../components/PageHeader";
 import { useRoomStore } from "../state/roomStore";
 
 export function JoinRoomPage() {
@@ -22,12 +23,12 @@ export function JoinRoomPage() {
   }
 
   return (
-    <section className="panel placeholder-page">
-      <div className="page-heading">
-        <span className="section-kicker">Existing lobby</span>
-        <h1>Join Room</h1>
-        <p>Enter your player name and the room code to join an existing lobby.</p>
-      </div>
+    <section className="panel panel--narrow placeholder-page">
+      <PageHeader
+        kicker="Existing lobby"
+        title="Join Room"
+        description="Enter your player name and the room code to join an existing lobby."
+      />
       <form className="form" onSubmit={handleSubmit}>
         <label className="form__field">
           <span>Player name</span>

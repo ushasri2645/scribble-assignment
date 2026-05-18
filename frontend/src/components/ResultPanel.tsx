@@ -1,8 +1,12 @@
+import { Card } from "./Card";
+
 export function ResultPanel() {
   return (
-    <article className="hero__card">
-      <h2>Results</h2>
+    <Card title="Results">
       <p className="placeholder-note">Result area placeholder</p>
-    </article>
+      <div className="placeholder-block">
+        <p>Winning word, final score, and guess history appear here in later phases.</p>
+      </div>
+    </Card>
   );
 }

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { PageHeader } from "../components/PageHeader";
 import { useRoomStore } from "../state/roomStore";
 
 export function CreateRoomPage() {
@@ -21,12 +22,12 @@ export function CreateRoomPage() {
   }
 
   return (
-    <section className="panel placeholder-page">
-      <div className="page-heading">
-        <span className="section-kicker">New lobby</span>
-        <h1>Create Room</h1>
-        <p>Pick a player name, create a room, and continue into the lobby.</p>
-      </div>
+    <section className="panel panel--narrow placeholder-page">
+      <PageHeader
+        kicker="New lobby"
+        title="Create Room"
+        description="Pick a player name, create a room, and continue into the lobby."
+      />
       <form className="form" onSubmit={handleSubmit}>
         <label className="form__field">
           <span>Player name</span>
