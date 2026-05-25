@@ -13,7 +13,8 @@ try {
   let failed = false;
 
   // Check that email is filled in (not empty after "- Email:")
-  const emailMatch = prBody.match(/-\s*Email:\s*(.+)/);
+  // Use [^\S\r\n]* (whitespace except newlines) to avoid consuming line breaks
+  const emailMatch = prBody.match(/-\s*Email:[^\S\r\n]*([^\r\n]+)/);
   const hasEmail = Boolean(emailMatch && emailMatch[1].trim().length > 0);
 
   if (!hasEmail) {
