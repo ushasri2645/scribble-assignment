@@ -22,6 +22,7 @@ export function GamePage() {
   }
 
   const viewer = room.participants.find((participant) => participant.id === participantId) ?? null;
+  const host = room.participants[0] ?? null;
 
   return (
     <section className="panel game-page">
@@ -56,7 +57,11 @@ export function GamePage() {
               </div>
               <div>
                 <dt>Status</dt>
-                <dd>Playing</dd>
+                <dd>{room.status === "game" ? "Playing" : "Waiting in lobby"}</dd>
+              </div>
+              <div>
+                <dt>Host</dt>
+                <dd>{host?.name ?? "Unknown host"}</dd>
               </div>
             </dl>
           </Card>
