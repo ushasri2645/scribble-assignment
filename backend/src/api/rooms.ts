@@ -5,8 +5,15 @@ import {
   joinRoomSchema,
   roomCodeParamsSchema,
   roomViewerQuerySchema,
+  startRoomSchema,
 } from "./schemas.js";
-import { createRoom, getRoom, joinRoom, toRoomSnapshot } from "../services/roomStore.js";
+import {
+  createRoom,
+  getRoom,
+  joinRoom,
+  startRoom,
+  toRoomSnapshot
+} from "../services/roomStore.js";
 
 export function createRoomsRouter() {
   const router = Router();
@@ -40,6 +47,37 @@ export function createRoomsRouter() {
         room: toRoomSnapshot(result.room, result.participantId)
       });
     } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/:code/start", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId, secretWord } = startRoomSchema.parse(request.body);
+      const room = startRoom(code.toUpperCase(), participantId, secretWord);
+
+      if (!room) {
+        throw new HttpError(404, "Unable to start room");
+      }
+
+      response.json({ room: toRoomSnapshot(room, participantId) });
+    } catch (error) {
+      if (error instanceof Error && error.message === "Only the host can start the game") {
+        next(new HttpError(403, error.message));
+        return;
+      }
+
+      if (error instanceof Error && error.message === "At least 2 players are required to start") {
+        next(new HttpError(409, error.message));
+        return;
+      }
+
+      if (error instanceof Error && error.message === "Secret word must come from the starter list") {
+        next(new HttpError(400, error.message));
+        return;
+      }
+
       next(error);
     }
   });
