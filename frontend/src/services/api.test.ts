@@ -12,8 +12,14 @@ describe("api service", () => {
       json: () =>
         Promise.resolve({
           participantId: "p1",
-          room: { code: "ABCD", status: "lobby", participants: [] },
-        }),
+          room: {
+            code: "ABCD",
+            status: "lobby",
+            participants: [],
+            availableWords: [],
+            roles: []
+          }
+        })
     };
     vi.mocked(fetch).mockResolvedValue(mockResponse as unknown as Response);
 
@@ -23,7 +29,35 @@ describe("api service", () => {
       expect.stringContaining("/rooms"),
       expect.objectContaining({
         method: "POST",
-        body: JSON.stringify({ playerName: "Alice" }),
+        body: JSON.stringify({ playerName: "Alice" })
+      })
+    );
+  });
+
+  it("joinRoom sends POST to /rooms/:code/join with playerName in body", async () => {
+    const mockResponse = {
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          participantId: "p2",
+          room: {
+            code: "ABCD",
+            status: "lobby",
+            participants: [],
+            availableWords: [],
+            roles: []
+          }
+        })
+    };
+    vi.mocked(fetch).mockResolvedValue(mockResponse as unknown as Response);
+
+    await api.joinRoom("ABCD", "Bob");
+
+    expect(fetch).toHaveBeenCalledWith(
+      expect.stringContaining("/rooms/ABCD/join"),
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ playerName: "Bob" })
       })
     );
   });
@@ -33,8 +67,14 @@ describe("api service", () => {
       ok: true,
       json: () =>
         Promise.resolve({
-          room: { code: "XYZW", status: "lobby", participants: [] },
-        }),
+          room: {
+            code: "XYZW",
+            status: "lobby",
+            participants: [],
+            availableWords: [],
+            roles: []
+          }
+        })
     };
     vi.mocked(fetch).mockResolvedValue(mockResponse as unknown as Response);
 
@@ -45,4 +85,5 @@ describe("api service", () => {
       expect.anything()
     );
   });
+
 });
