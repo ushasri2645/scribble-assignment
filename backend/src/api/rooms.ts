@@ -4,7 +4,7 @@ import {
   HttpError,
   joinRoomSchema,
   roomCodeParamsSchema,
-  roomViewerQuerySchema
+  roomViewerQuerySchema,
 } from "./schemas.js";
 import { createRoom, getRoom, joinRoom, toRoomSnapshot } from "../services/roomStore.js";
 
