@@ -18,8 +18,8 @@
 
 **Purpose**: Shared room model and typed client session primitives used by all stories
 
-- [ ] T001 [P] Add host-aware room lifecycle fields and status types in `backend/src/models/game.ts`
-- [ ] T002 [P] Align client room snapshot and session typing with the backend shape in `frontend/src/services/api.ts` and `frontend/src/state/roomStore.ts`
+- [X] T001 [P] Add host-aware room lifecycle fields and status types in `backend/src/models/game.ts`
+- [X] T002 [P] Align client room snapshot and session typing with the backend shape in `frontend/src/services/api.ts` and `frontend/src/state/roomStore.ts`
 
 ---
 
@@ -29,8 +29,8 @@
 
 **⚠️ CRITICAL**: No user story work should be merged until these shared rules are in place
 
-- [ ] T003 [P] Harden room-code and player-name validation boundaries in `backend/src/api/schemas.ts`
-- [ ] T004 [P] Normalize room cloning and snapshot helpers in `backend/src/services/roomStore.ts`
+- [X] T003 [P] Harden room-code and player-name validation boundaries in `backend/src/api/schemas.ts`
+- [X] T004 [P] Normalize room cloning and snapshot helpers in `backend/src/services/roomStore.ts`
 
 **Checkpoint**: Shared validation and snapshot handling are ready for story-specific work
 
@@ -44,13 +44,13 @@
 
 ### Tests for User Story 1
 
-- [ ] T005 [P] [US1] Add backend coverage in `backend/src/services/roomStore.test.ts` for creator-as-host, join flow, and room isolation
-- [ ] T006 [P] [US1] Add client request/response coverage in `frontend/src/services/api.test.ts` for create-room and join-room session payloads
+- [X] T005 [P] [US1] Add backend coverage in `backend/src/services/roomStore.test.ts` for creator-as-host, join flow, and room isolation
+- [X] T006 [P] [US1] Add client request/response coverage in `frontend/src/services/api.test.ts` for create-room and join-room session payloads
 
 ### Implementation for User Story 1
 
-- [ ] T007 [US1] Implement host assignment and room membership registration in `backend/src/services/roomStore.ts` and `backend/src/api/rooms.ts`
-- [ ] T008 [US1] Wire the create/join screens to persist the returned participant session and enter the lobby in `frontend/src/pages/CreateRoomPage.tsx`, `frontend/src/pages/JoinRoomPage.tsx`, and `frontend/src/state/roomStore.ts`
+- [X] T007 [US1] Implement host assignment and room membership registration in `backend/src/services/roomStore.ts` and `backend/src/api/rooms.ts`
+- [X] T008 [US1] Wire the create/join screens to persist the returned participant session and enter the lobby in `frontend/src/pages/CreateRoomPage.tsx`, `frontend/src/pages/JoinRoomPage.tsx`, and `frontend/src/state/roomStore.ts`
 
 **Checkpoint**: User Story 1 should be fully functional and independently testable
 
@@ -64,13 +64,13 @@
 
 ### Tests for User Story 2
 
-- [ ] T009 [P] [US2] Add schema and route coverage in `backend/src/api/schemas.test.ts` for whitespace-only names, invalid room codes, and rejected room lookups
-- [ ] T010 [P] [US2] Add frontend form validation coverage in `frontend/src/pages/CreateRoomPage.test.tsx` and `frontend/src/pages/JoinRoomPage.test.tsx`
+- [X] T009 [P] [US2] Add schema and route coverage in `backend/src/api/schemas.test.ts` for whitespace-only names, invalid room codes, and rejected room lookups
+- [X] T010 [P] [US2] Add frontend form validation coverage in `frontend/src/pages/CreateRoomPage.test.tsx` and `frontend/src/pages/JoinRoomPage.test.tsx`
 
 ### Implementation for User Story 2
 
-- [ ] T011 [P] [US2] Enforce trimmed-name and non-empty room-code rules in `backend/src/api/schemas.ts`
-- [ ] T012 [US2] Return clear HTTP errors from `backend/src/api/rooms.ts` and surface them in `frontend/src/pages/CreateRoomPage.tsx` and `frontend/src/pages/JoinRoomPage.tsx`
+- [X] T011 [P] [US2] Enforce trimmed-name and non-empty room-code rules in `backend/src/api/schemas.ts`
+- [X] T012 [US2] Return clear HTTP errors from `backend/src/api/rooms.ts` and surface them in `frontend/src/pages/CreateRoomPage.tsx` and `frontend/src/pages/JoinRoomPage.tsx`
 
 **Checkpoint**: Invalid input is blocked with clear feedback and no lobby entry
 
@@ -84,13 +84,13 @@
 
 ### Tests for User Story 3
 
-- [ ] T013 [P] [US3] Add polling and multi-room isolation coverage in `frontend/src/state/roomStore.test.ts`
+- [X] T013 [P] [US3] Add polling and multi-room isolation coverage in `frontend/src/state/roomStore.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T014 [P] [US3] Implement automatic lobby polling in `frontend/src/state/roomStore.ts`
-- [ ] T015 [P] [US3] Keep `GET /rooms/:code` snapshot responses isolated to the requested room in `backend/src/api/rooms.ts`
-- [ ] T016 [US3] Update `frontend/src/pages/LobbyPage.tsx` so automatic refresh and manual refresh stay consistent
+- [X] T014 [P] [US3] Implement automatic lobby polling in `frontend/src/state/roomStore.ts`
+- [X] T015 [P] [US3] Keep `GET /rooms/:code` snapshot responses isolated to the requested room in `backend/src/api/rooms.ts`
+- [X] T016 [US3] Update `frontend/src/pages/LobbyPage.tsx` so automatic refresh and manual refresh stay consistent
 
 **Checkpoint**: Lobby freshness and room isolation should work independently of game start
 
@@ -104,13 +104,13 @@
 
 ### Tests for User Story 4
 
-- [ ] T017 [P] [US4] Add backend coverage in `backend/src/services/roomStore.test.ts` for host-only start-game gating and the two-player minimum
-- [ ] T018 [P] [US4] Add frontend coverage in `frontend/src/pages/LobbyPage.test.tsx` and `frontend/src/pages/GamePage.test.tsx` for host-only start messaging and start-state UI
+- [X] T017 [P] [US4] Add room-state coverage in `backend/src/services/roomStore.test.ts` and `frontend/src/state/roomStore.test.ts` for host-only local start gating and the two-player minimum
+- [X] T018 [P] [US4] Add frontend coverage in `frontend/src/pages/LobbyPage.test.tsx` and `frontend/src/pages/GamePage.test.tsx` for host-only start messaging and start-state UI
 
 ### Implementation for User Story 4
 
-- [ ] T019 [P] [US4] Implement host-only start-game gating and room status transitions in `backend/src/services/roomStore.ts` and `backend/src/api/rooms.ts`
-- [ ] T020 [US4] Update `frontend/src/pages/LobbyPage.tsx` and `frontend/src/pages/GamePage.tsx` to show the host start affordance and game-status messaging
+- [X] T019 [P] [US4] Implement host-only local start gating and room status transitions in `frontend/src/state/roomStore.ts`
+- [X] T020 [US4] Update `frontend/src/pages/LobbyPage.tsx` and `frontend/src/pages/GamePage.tsx` to show the host start affordance and game-status messaging
 
 **Checkpoint**: The lobby should only advance when the host starts a room with at least two players
 
@@ -120,8 +120,8 @@
 
 **Purpose**: Documentation and contract cleanup after the implementation slices are complete
 
-- [ ] T021 [P] Update `specs/001-host-join-lobby/quickstart.md` with the final manual validation steps after implementation
-- [ ] T022 [P] Reconcile `specs/001-host-join-lobby/contracts/rooms.md` with the final request/response payloads
+- [X] T021 [P] Update `specs/001-host-join-lobby/quickstart.md` with the final manual validation steps after implementation
+- [X] T022 [P] Reconcile `specs/001-host-join-lobby/contracts/rooms.md` with the final request/response payloads
 
 ---
 

@@ -81,4 +81,5 @@ Returns the current room snapshot for the requested viewer.
 
 - Room state is in-memory only.
 - Room access uses HTTP only.
+- The host is the first participant in the room's participant list.
 - Future game-state endpoints should preserve this same snapshot-oriented style.
