@@ -10,6 +10,7 @@ export function LobbyPage() {
   const roomStore = useRoomStore();
   const { room, error, isLoading, participantId } = useRoomState();
   const [refreshError, setRefreshError] = useState<string | null>(null);
+  const [selectedWord, setSelectedWord] = useState("");
 
   useEffect(() => {
     if (!room) {
@@ -21,6 +22,21 @@ export function LobbyPage() {
       navigate("/game", { replace: true });
     }
   }, [navigate, room]);
+
+  useEffect(() => {
+    if (!room) {
+      return;
+    }
+
+    if (room.availableWords.length === 0) {
+      setSelectedWord("");
+      return;
+    }
+
+    if (!room.availableWords.includes(selectedWord)) {
+      setSelectedWord(room.availableWords[0]);
+    }
+  }, [room, selectedWord]);
 
   useEffect(() => {
     if (!room) {
@@ -46,7 +62,7 @@ export function LobbyPage() {
   async function handleStartGame() {
     try {
       setRefreshError(null);
-      await roomStore.startRoom();
+      await roomStore.startRoom(selectedWord);
       navigate("/game");
     } catch (caughtError) {
       setRefreshError(caughtError instanceof Error ? caughtError.message : "Unable to start the game");
@@ -59,7 +75,7 @@ export function LobbyPage() {
 
   const host = room.participants[0] ?? null;
   const isHost = participantId === host?.id;
-  const canStart = isHost && room.participants.length >= 2 && room.status === "lobby";
+  const canStart = isHost && room.participants.length >= 2 && room.status === "lobby" && selectedWord.length > 0;
 
   return (
     <section className="panel placeholder-page">
@@ -98,6 +114,22 @@ export function LobbyPage() {
           <p style={{ marginTop: "8px" }}>
             Host: <strong>{host?.name ?? "Unknown"}</strong>
           </p>
+          {isHost ? (
+            <label className="form__field" style={{ marginTop: "12px" }}>
+              <span>Secret word</span>
+              <select
+                className="form__input"
+                value={selectedWord}
+                onChange={(event) => setSelectedWord(event.target.value)}
+              >
+                {room.availableWords.map((word) => (
+                  <option key={word} value={word}>
+                    {word}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
         </Card>
       </div>
 

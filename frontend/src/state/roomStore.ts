@@ -142,7 +142,7 @@ export class RoomStore {
     return this.withLoading(() => this.refreshRoom());
   }
 
-  async startRoom() {
+  async startRoom(secretWord: string) {
     const currentRoom = this.state.room;
     const participantId = this.state.participantId;
 
@@ -150,20 +150,8 @@ export class RoomStore {
       return null;
     }
 
-    const host = currentRoom.participants[0];
-
-    if (!host || host.id !== participantId) {
-      throw new Error("Only the host can start the game");
-    }
-
-    if (currentRoom.participants.length < 2) {
-      throw new Error("At least 2 players are required to start");
-    }
-
-    const nextRoom: RoomSnapshot = {
-      ...currentRoom,
-      status: "game"
-    };
+    const response = await this.withLoading(() => api.startRoom(currentRoom.code, participantId, secretWord));
+    const nextRoom = response.room;
 
     this.setState({
       room: nextRoom,
