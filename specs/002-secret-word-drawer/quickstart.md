@@ -30,8 +30,7 @@ npm run dev
    round.
 2. Join the same room from a second tab and confirm both players share the
    same room snapshot.
-3. Start the round from the host tab and confirm the selected word comes from
-   the starter list.
+3. Choose a starter word from the host tab and start the round.
 4. Confirm the drawer sees the secret word and the second tab does not.
 5. Try blank or whitespace-only player names and confirm they are rejected
    with a clear error.
@@ -42,5 +41,5 @@ npm run dev
   rooms.
 - Room snapshots are expected to vary by viewer so the drawer can see the
   secret word while guessers cannot.
-- The selected word is deterministic for the round start, which keeps the
-  feature easy to test.
+- The host chooses the word from the starter list before starting the round,
+  which keeps the feature easy to test.

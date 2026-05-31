@@ -58,7 +58,8 @@ Starts the first round for the host/drawer.
 
 ```json
 {
-  "participantId": "uuid"
+  "participantId": "uuid",
+  "secretWord": "rocket"
 }
 ```
 
@@ -140,6 +141,6 @@ Returns the current room snapshot for the requested viewer.
 - Room state is in-memory only.
 - Room access uses HTTP only.
 - The drawer is the first participant in the room's participant list.
-- The secret word is deterministic for a given round start and must only be
+- The host chooses the secret word from the starter list and it must only be
   present in snapshots returned to the drawer.
 - Player names are trimmed at the API boundary and rejected when empty.

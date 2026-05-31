@@ -36,7 +36,7 @@
 
 - **Fields**
   - `drawerParticipantId`: Participant id of the first player in the room
-  - `secretWord`: Word chosen from the starter list
+  - `secretWord`: Word chosen by the host from the starter list
   - `startedAt`: Timestamp when the round began
 - **Validation rules**
   - `drawerParticipantId` must refer to the first participant in the room
@@ -71,8 +71,8 @@
 ## Derived Rules
 
 - The first participant in a newly created room is the drawer for the first round.
-- The secret word is selected deterministically from the starter word list when
-  the round starts.
+- The host selects the secret word from the starter word list when the round
+  starts.
 - The drawer sees the secret word in their snapshot; guessers see the same room
   state without it.
 - Player names are trimmed before storage and rejected if they become empty.

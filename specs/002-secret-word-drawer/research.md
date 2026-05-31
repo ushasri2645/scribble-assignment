@@ -27,14 +27,14 @@
 - Alternatives considered: Keeping the word only in frontend state, or exposing
   the full round payload to every viewer and hiding it in the UI.
 
-## 4. Deterministic word selection
+## 4. Host-selected word choice
 
-- Decision: Select the starter word deterministically from the starter list,
-  using the first available word for the first round.
-- Rationale: The spec calls for a deterministic choice, and a fixed selection
-  is easy to test and reason about.
-- Alternatives considered: Random selection, hashing the room code, or rotating
-  through the starter list by round number.
+- Decision: Let the host choose a starter-list word at round start and store
+  that selected value on the server.
+- Rationale: The host is already the authoritative starter for the round, and
+  using the shared starter list keeps the choice bounded and testable.
+- Alternatives considered: Fully automatic selection, random selection, or
+  hashing the room code to derive a word.
 
 ## 5. Input validation
 

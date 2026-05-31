@@ -6,7 +6,7 @@
 
 ## Summary
 
-Implement the first-round game start flow so the host becomes the drawer, a deterministic word is selected from the starter list, and the chosen word is visible only to the drawer while guessers see the round without the secret word.
+Implement the first-round game start flow so the host becomes the drawer, the host chooses a word from the starter list, and the chosen word is visible only to the drawer while guessers see the round without the secret word.
 
 ## Technical Context
 
