@@ -29,14 +29,10 @@ function generateUniqueCode() {
   return code;
 }
 
-function displayName(name?: string) {
-  return name || "Player";
-}
-
-function createParticipant(name?: string): Participant {
+function createParticipant(name: string): Participant {
   return {
     id: randomUUID(),
-    name: displayName(name),
+    name: name.trim(),
     joinedAt: now()
   };
 }
@@ -49,12 +45,17 @@ export function listWords() {
   return [...STARTER_WORDS];
 }
 
-export function createRoom(playerName?: string) {
+export function resetRooms() {
+  rooms.clear();
+}
+
+export function createRoom(playerName: string) {
   const participant = createParticipant(playerName);
   const room: Room = {
     code: generateUniqueCode(),
     status: "lobby",
     participants: [participant],
+    round: null,
     createdAt: now(),
     updatedAt: now()
   };
@@ -67,7 +68,7 @@ export function createRoom(playerName?: string) {
   };
 }
 
-export function joinRoom(code: string, playerName?: string) {
+export function joinRoom(code: string, playerName: string) {
   const room = rooms.get(code);
 
   if (!room) {
@@ -96,14 +97,59 @@ export function saveRoom(room: Room) {
   return getRoom(room.code);
 }
 
-export function toRoomSnapshot(room: Room, viewerParticipantId?: string): RoomSnapshot {
-  void viewerParticipantId;
+export function startRoom(code: string, participantId: string, secretWord: string) {
+  const room = rooms.get(code);
 
-  return {
+  if (!room) {
+    return null;
+  }
+
+  if (!STARTER_WORDS.includes(secretWord as (typeof STARTER_WORDS)[number])) {
+    throw new Error("Secret word must come from the starter list");
+  }
+
+  const host = room.participants[0] ?? null;
+
+  if (!host || host.id !== participantId) {
+    throw new Error("Only the host can start the game");
+  }
+
+  if (room.participants.length < 2) {
+    throw new Error("At least 2 players are required to start");
+  }
+
+  if (room.status === "game" && room.round) {
+    return cloneRoom(room);
+  }
+
+  room.status = "game";
+  room.round = {
+    drawerParticipantId: host.id,
+    secretWord,
+    startedAt: now()
+  };
+  room.updatedAt = now();
+  rooms.set(room.code, room);
+
+  return cloneRoom(room);
+}
+
+export function toRoomSnapshot(room: Room, viewerParticipantId?: string): RoomSnapshot {
+  const drawerParticipantId = room.round?.drawerParticipantId ?? null;
+  const isDrawer = drawerParticipantId !== null && drawerParticipantId === viewerParticipantId;
+
+  const snapshot: RoomSnapshot = {
     code: room.code,
     status: room.status,
     participants: room.participants.map((participant) => ({ ...participant })),
     availableWords: listWords(),
-    roles: [...STARTER_ROLES]
+    roles: [...STARTER_ROLES],
+    drawerParticipantId
   };
+
+  if (isDrawer && room.round) {
+    snapshot.secretWord = room.round.secretWord;
+  }
+
+  return snapshot;
 }
