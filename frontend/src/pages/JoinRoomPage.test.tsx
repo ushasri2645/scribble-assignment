@@ -18,6 +18,17 @@ vi.mock("../state/roomStore", () => ({
 import { JoinRoomPage } from "./JoinRoomPage";
 
 describe("JoinRoomPage", () => {
+  function setInputValue(input: HTMLInputElement, value: string) {
+    const descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
+
+    if (!descriptor?.set) {
+      throw new Error("Unable to set input value in test");
+    }
+
+    descriptor.set.call(input, value);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+
   beforeEach(() => {
     document.body.innerHTML = "<div id=\"root\"></div>";
     navigateMock.mockReset();
@@ -49,10 +60,11 @@ describe("JoinRoomPage", () => {
     const button = container.querySelector("button[type='submit']") as HTMLButtonElement;
 
     await act(async () => {
-      playerNameInput.value = "Bob";
-      playerNameInput.dispatchEvent(new Event("input", { bubbles: true }));
-      roomCodeInput.value = "abcd";
-      roomCodeInput.dispatchEvent(new Event("input", { bubbles: true }));
+      setInputValue(playerNameInput, "Bob");
+      setInputValue(roomCodeInput, "abcd");
+    });
+
+    await act(async () => {
       button.click();
     });
 
