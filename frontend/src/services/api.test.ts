@@ -17,7 +17,8 @@ describe("api service", () => {
             status: "lobby",
             participants: [],
             availableWords: [],
-            roles: []
+            roles: [],
+            drawerParticipantId: null
           }
         })
     };
@@ -45,7 +46,8 @@ describe("api service", () => {
             status: "lobby",
             participants: [],
             availableWords: [],
-            roles: []
+            roles: [],
+            drawerParticipantId: null
           }
         })
     };
@@ -72,7 +74,8 @@ describe("api service", () => {
             status: "lobby",
             participants: [],
             availableWords: [],
-            roles: []
+            roles: [],
+            drawerParticipantId: null
           }
         })
     };
@@ -83,6 +86,35 @@ describe("api service", () => {
     expect(fetch).toHaveBeenCalledWith(
       expect.stringContaining("/rooms/XYZW?participantId=p1"),
       expect.anything()
+    );
+  });
+
+  it("startRoom sends POST to /rooms/:code/start with participantId in body", async () => {
+    const mockResponse = {
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          room: {
+            code: "ABCD",
+            status: "game",
+            participants: [],
+            availableWords: [],
+            roles: [],
+            drawerParticipantId: "p1",
+            secretWord: "rocket"
+          }
+        })
+    };
+    vi.mocked(fetch).mockResolvedValue(mockResponse as unknown as Response);
+
+    await api.startRoom("ABCD", "p1", "rocket");
+
+    expect(fetch).toHaveBeenCalledWith(
+      expect.stringContaining("/rooms/ABCD/start"),
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ participantId: "p1", secretWord: "rocket" })
+      })
     );
   });
 

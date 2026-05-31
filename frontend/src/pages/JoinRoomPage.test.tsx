@@ -43,7 +43,8 @@ describe("JoinRoomPage", () => {
         status: "lobby",
         participants: [],
         availableWords: [],
-        roles: []
+        roles: [],
+        drawerParticipantId: null
       }
     });
 

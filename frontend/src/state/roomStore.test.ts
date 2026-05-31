@@ -6,7 +6,8 @@ vi.mock("../services/api", () => ({
   api: {
     createRoom: vi.fn(),
     joinRoom: vi.fn(),
-    fetchRoom: vi.fn()
+    fetchRoom: vi.fn(),
+    startRoom: vi.fn()
   }
 }));
 
@@ -28,7 +29,8 @@ describe("RoomStore", () => {
         status: "lobby",
         participants: [{ id: "p1", name: "Alice", joinedAt: "2026-05-31T00:00:00.000Z" }],
         availableWords: ["rocket"],
-        roles: ["drawer", "guesser"]
+        roles: ["drawer", "guesser"],
+        drawerParticipantId: null
       }
     });
     mockedApi.fetchRoom.mockResolvedValue({
@@ -37,7 +39,8 @@ describe("RoomStore", () => {
         status: "lobby",
         participants: [{ id: "p1", name: "Alice", joinedAt: "2026-05-31T00:00:00.000Z" }],
         availableWords: ["rocket"],
-        roles: ["drawer", "guesser"]
+        roles: ["drawer", "guesser"],
+        drawerParticipantId: null
       }
     });
 
@@ -64,7 +67,8 @@ describe("RoomStore", () => {
           { id: "p2", name: "Bob", joinedAt: "2026-05-31T00:00:01.000Z" }
         ],
         availableWords: ["rocket"],
-        roles: ["drawer", "guesser"]
+        roles: ["drawer", "guesser"],
+        drawerParticipantId: null
       }
     });
 
@@ -75,7 +79,7 @@ describe("RoomStore", () => {
     expect(store.getSnapshot().room?.participants).toHaveLength(2);
   });
 
-  it("starts the current room locally when the host requests it", async () => {
+  it("starts the current room through the API when the host requests it", async () => {
     mockedApi.createRoom.mockResolvedValue({
       participantId: "p1",
       room: {
@@ -86,16 +90,32 @@ describe("RoomStore", () => {
           { id: "p2", name: "Bob", joinedAt: "2026-05-31T00:00:01.000Z" }
         ],
         availableWords: ["rocket"],
-        roles: ["drawer", "guesser"]
+        roles: ["drawer", "guesser"],
+        drawerParticipantId: null
+      }
+    });
+    mockedApi.startRoom.mockResolvedValue({
+      room: {
+        code: "ABCD",
+        status: "game",
+        participants: [
+          { id: "p1", name: "Alice", joinedAt: "2026-05-31T00:00:00.000Z" },
+          { id: "p2", name: "Bob", joinedAt: "2026-05-31T00:00:01.000Z" }
+        ],
+        availableWords: ["rocket"],
+        roles: ["drawer", "guesser"],
+        drawerParticipantId: "p1",
+        secretWord: "rocket"
       }
     });
 
     const store = new RoomStore();
     await store.createRoom("Alice");
 
-    const started = await store.startRoom();
+    const started = await store.startRoom("rocket");
 
     expect(started?.status).toBe("game");
     expect(store.getSnapshot().room?.status).toBe("game");
+    expect(mockedApi.startRoom).toHaveBeenCalledWith("ABCD", "p1", "rocket");
   });
 });

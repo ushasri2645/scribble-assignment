@@ -16,8 +16,9 @@ const roomState = {
       { id: "p1", name: "Alice", joinedAt: "2026-05-31T00:00:00.000Z" },
       { id: "p2", name: "Bob", joinedAt: "2026-05-31T00:00:01.000Z" }
     ],
-    availableWords: [],
-    roles: []
+    availableWords: ["rocket", "pizza"],
+    roles: [],
+    drawerParticipantId: null
   },
   participantId: "p1",
   error: null,
@@ -52,11 +53,15 @@ describe("LobbyPage", () => {
 
   it("shows the start button for the host and starts the game", async () => {
     startRoomMock.mockResolvedValue({
-      code: "ABCD",
-      status: "game",
-      participants: roomState.room.participants,
-      availableWords: [],
-      roles: []
+      room: {
+        code: "ABCD",
+        status: "game",
+        participants: roomState.room.participants,
+        availableWords: ["rocket", "pizza"],
+        roles: [],
+        drawerParticipantId: "p1",
+        secretWord: "rocket"
+      }
     });
 
     const container = document.getElementById("root") as HTMLElement;
@@ -68,6 +73,12 @@ describe("LobbyPage", () => {
 
     expect(enablePollingMock).toHaveBeenCalled();
 
+    const select = container.querySelector("select") as HTMLSelectElement;
+    await act(async () => {
+      select.value = "pizza";
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
     const startButton = Array.from(container.querySelectorAll("button")).find(
       (button) => button.textContent === "Start Game"
     ) as HTMLButtonElement;
@@ -76,7 +87,7 @@ describe("LobbyPage", () => {
       startButton.click();
     });
 
-    expect(startRoomMock).toHaveBeenCalled();
+    expect(startRoomMock).toHaveBeenCalledWith("ABCD", "p1", "pizza");
     expect(navigateMock).toHaveBeenCalledWith("/game");
 
     await act(async () => {
