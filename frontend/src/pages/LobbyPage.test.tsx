@@ -87,7 +87,7 @@ describe("LobbyPage", () => {
       startButton.click();
     });
 
-    expect(startRoomMock).toHaveBeenCalledWith("ABCD", "p1", "pizza");
+    expect(startRoomMock).toHaveBeenCalledWith("pizza");
     expect(navigateMock).toHaveBeenCalledWith("/game");
 
     await act(async () => {
