@@ -1,6 +1,6 @@
 import {
-  createElement,
   createContext,
+  createElement,
   useContext,
   useEffect,
   useRef,
@@ -18,7 +18,9 @@ export interface RoomState {
 
 type Listener = () => void;
 
-class RoomStore {
+const POLLING_INTERVAL_MS = 2000;
+
+export class RoomStore {
   private state: RoomState = {
     room: null,
     participantId: null,
@@ -27,6 +29,7 @@ class RoomStore {
   };
 
   private listeners = new Set<Listener>();
+  private pollHandle: ReturnType<typeof setInterval> | null = null;
 
   subscribe = (listener: Listener) => {
     this.listeners.add(listener);
@@ -45,20 +48,66 @@ class RoomStore {
     this.listeners.forEach((listener) => listener());
   }
 
+  private setLoading(isLoading: boolean) {
+    this.setState({ isLoading });
+  }
+
+  private setError(error: string | null) {
+    this.setState({ error });
+  }
+
   private async withLoading<T>(operation: () => Promise<T>) {
-    this.setState({
-      isLoading: true,
-      error: null
-    });
+    this.setLoading(true);
+    this.setError(null);
 
     try {
       return await operation();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unexpected request failure";
-      this.setState({ error: message });
+      this.setError(message);
       throw error;
     } finally {
-      this.setState({ isLoading: false });
+      this.setLoading(false);
+    }
+  }
+
+  private startPolling() {
+    if (this.pollHandle) {
+      return;
+    }
+
+    this.pollHandle = setInterval(() => {
+      void this.refreshRoom();
+    }, POLLING_INTERVAL_MS);
+  }
+
+  private stopPolling() {
+    if (!this.pollHandle) {
+      return;
+    }
+
+    clearInterval(this.pollHandle);
+    this.pollHandle = null;
+  }
+
+  private async refreshRoom() {
+    const currentRoom = this.state.room;
+
+    if (!currentRoom) {
+      return null;
+    }
+
+    try {
+      const response = await api.fetchRoom(currentRoom.code, this.state.participantId ?? undefined);
+      this.setState({
+        room: response.room,
+        error: null
+      });
+      return response.room;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unexpected request failure";
+      this.setError(message);
+      return null;
     }
   }
 
@@ -90,13 +139,50 @@ class RoomStore {
   }
 
   async fetchRoom() {
-    if (!this.state.room) {
+    return this.withLoading(() => this.refreshRoom());
+  }
+
+  async startRoom() {
+    const currentRoom = this.state.room;
+    const participantId = this.state.participantId;
+
+    if (!currentRoom || !participantId) {
       return null;
     }
 
-    const response = await api.fetchRoom(this.state.room.code, this.state.participantId ?? undefined);
-    this.setRoomSnapshot(response.room);
-    return response.room;
+    const host = currentRoom.participants[0];
+
+    if (!host || host.id !== participantId) {
+      throw new Error("Only the host can start the game");
+    }
+
+    if (currentRoom.participants.length < 2) {
+      throw new Error("At least 2 players are required to start");
+    }
+
+    const nextRoom: RoomSnapshot = {
+      ...currentRoom,
+      status: "game"
+    };
+
+    this.setState({
+      room: nextRoom,
+      error: null
+    });
+
+    return nextRoom;
+  }
+
+  enablePolling() {
+    this.startPolling();
+  }
+
+  disablePolling() {
+    this.stopPolling();
+  }
+
+  dispose() {
+    this.stopPolling();
   }
 }
 
@@ -109,7 +195,11 @@ export function RoomStoreProvider({ children }: PropsWithChildren) {
     storeRef.current = new RoomStore();
   }
 
-  useEffect(() => undefined, []);
+  useEffect(() => {
+    return () => {
+      storeRef.current?.dispose();
+    };
+  }, []);
 
   return createElement(RoomStoreContext.Provider, { value: storeRef.current }, children);
 }

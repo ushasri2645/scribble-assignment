@@ -8,14 +8,31 @@ import { useRoomState, useRoomStore } from "../state/roomStore";
 export function LobbyPage() {
   const navigate = useNavigate();
   const roomStore = useRoomStore();
-  const { room, error, isLoading } = useRoomState();
+  const { room, error, isLoading, participantId } = useRoomState();
   const [refreshError, setRefreshError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!room) {
       navigate("/", { replace: true });
+      return;
+    }
+
+    if (room.status === "game") {
+      navigate("/game", { replace: true });
     }
   }, [navigate, room]);
+
+  useEffect(() => {
+    if (!room) {
+      return;
+    }
+
+    roomStore.enablePolling();
+
+    return () => {
+      roomStore.disablePolling();
+    };
+  }, [room?.code, roomStore]);
 
   async function handleRefresh() {
     try {
@@ -26,9 +43,23 @@ export function LobbyPage() {
     }
   }
 
+  async function handleStartGame() {
+    try {
+      setRefreshError(null);
+      await roomStore.startRoom();
+      navigate("/game");
+    } catch (caughtError) {
+      setRefreshError(caughtError instanceof Error ? caughtError.message : "Unable to start the game");
+    }
+  }
+
   if (!room) {
     return null;
   }
+
+  const host = room.participants[0] ?? null;
+  const isHost = participantId === host?.id;
+  const canStart = isHost && room.participants.length >= 2 && room.status === "lobby";
 
   return (
     <section className="panel placeholder-page">
@@ -61,7 +92,12 @@ export function LobbyPage() {
           <p className="status-line" style={{ backgroundColor: isLoading ? '#fef3c7' : '#e0e7ff', color: isLoading ? '#b45309' : '#3730a3' }}>
             {isLoading ? "Refreshing players..." : "Ready to play"}
           </p>
-          <p style={{ marginTop: '8px' }}>{error ?? refreshError ?? "Waiting for the host to start the game."}</p>
+          <p style={{ marginTop: "8px" }}>
+            {error ?? refreshError ?? (isHost ? "You created this room, so you are the host." : "Waiting for the host to share the room and begin the session.")}
+          </p>
+          <p style={{ marginTop: "8px" }}>
+            Host: <strong>{host?.name ?? "Unknown"}</strong>
+          </p>
         </Card>
       </div>
 
@@ -69,8 +105,8 @@ export function LobbyPage() {
         <button className="button button--secondary" disabled={isLoading} onClick={handleRefresh}>
           {isLoading ? "Refreshing..." : "Refresh Room"}
         </button>
-        <button className="button button--primary" onClick={() => navigate("/game")}>
-          Start Game
+        <button className="button button--primary" disabled={!canStart || isLoading} onClick={handleStartGame}>
+          {canStart ? "Start Game" : "Waiting for more players"}
         </button>
       </div>
     </section>
