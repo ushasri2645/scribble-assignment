@@ -44,6 +44,7 @@ export interface RoomSnapshot {
   availableWords: string[];
   roles: ParticipantRole[];
   drawerParticipantId: string | null;
+  roundPhase: "active" | "ended" | null;
   canvasEvents: CanvasEvent[];
   guessHistory: GuessEntry[];
   scores: Record<string, number>;
@@ -112,6 +113,12 @@ export const api = {
     return request<{ room: RoomSnapshot }>(`/rooms/${encodeURIComponent(code)}/guess`, {
       method: "POST",
       body: JSON.stringify({ participantId, guessText })
+    });
+  },
+  restartRoom(code: string, participantId: string) {
+    return request<{ room: RoomSnapshot }>(`/rooms/${encodeURIComponent(code)}/restart`, {
+      method: "POST",
+      body: JSON.stringify({ participantId })
     });
   },
   fetchRoom(code: string, participantId?: string) {
