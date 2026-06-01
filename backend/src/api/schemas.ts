@@ -33,6 +33,10 @@ export const startRoomSchema = z.object({
   secretWord: z.enum(STARTER_WORDS)
 });
 
+export const restartRoomSchema = z.object({
+  participantId: z.string().trim().min(1, "Participant id is required")
+});
+
 export const drawCanvasSchema = z.object({
   participantId: z.string().trim().min(1, "Participant id is required"),
   stroke: strokeSchema
