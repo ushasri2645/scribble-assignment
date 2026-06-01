@@ -7,7 +7,10 @@ vi.mock("../services/api", () => ({
     createRoom: vi.fn(),
     joinRoom: vi.fn(),
     fetchRoom: vi.fn(),
-    startRoom: vi.fn()
+    startRoom: vi.fn(),
+    drawCanvas: vi.fn(),
+    clearCanvas: vi.fn(),
+    submitGuess: vi.fn()
   }
 }));
 
@@ -19,6 +22,10 @@ describe("RoomStore", () => {
     mockedApi.createRoom.mockReset();
     mockedApi.joinRoom.mockReset();
     mockedApi.fetchRoom.mockReset();
+    mockedApi.startRoom.mockReset();
+    mockedApi.drawCanvas.mockReset();
+    mockedApi.clearCanvas.mockReset();
+    mockedApi.submitGuess.mockReset();
   });
 
   it("creates a room session and polls for room updates", async () => {
@@ -30,7 +37,10 @@ describe("RoomStore", () => {
         participants: [{ id: "p1", name: "Alice", joinedAt: "2026-05-31T00:00:00.000Z" }],
         availableWords: ["rocket"],
         roles: ["drawer", "guesser"],
-        drawerParticipantId: null
+        drawerParticipantId: null,
+        canvasEvents: [],
+        guessHistory: [],
+        scores: {}
       }
     });
     mockedApi.fetchRoom.mockResolvedValue({
@@ -40,7 +50,10 @@ describe("RoomStore", () => {
         participants: [{ id: "p1", name: "Alice", joinedAt: "2026-05-31T00:00:00.000Z" }],
         availableWords: ["rocket"],
         roles: ["drawer", "guesser"],
-        drawerParticipantId: null
+        drawerParticipantId: null,
+        canvasEvents: [],
+        guessHistory: [],
+        scores: {}
       }
     });
 
@@ -68,7 +81,10 @@ describe("RoomStore", () => {
         ],
         availableWords: ["rocket"],
         roles: ["drawer", "guesser"],
-        drawerParticipantId: null
+        drawerParticipantId: null,
+        canvasEvents: [],
+        guessHistory: [],
+        scores: {}
       }
     });
 
@@ -91,7 +107,10 @@ describe("RoomStore", () => {
         ],
         availableWords: ["rocket"],
         roles: ["drawer", "guesser"],
-        drawerParticipantId: null
+        drawerParticipantId: null,
+        canvasEvents: [],
+        guessHistory: [],
+        scores: {}
       }
     });
     mockedApi.startRoom.mockResolvedValue({
@@ -105,6 +124,9 @@ describe("RoomStore", () => {
         availableWords: ["rocket"],
         roles: ["drawer", "guesser"],
         drawerParticipantId: "p1",
+        canvasEvents: [],
+        guessHistory: [],
+        scores: { p1: 0, p2: 0 },
         secretWord: "rocket"
       }
     });
@@ -117,5 +139,118 @@ describe("RoomStore", () => {
     expect(started?.status).toBe("game");
     expect(store.getSnapshot().room?.status).toBe("game");
     expect(mockedApi.startRoom).toHaveBeenCalledWith("ABCD", "p1", "rocket");
+  });
+
+  it("draws, clears, and submits guesses through the API", async () => {
+    mockedApi.createRoom.mockResolvedValue({
+      participantId: "p1",
+      room: {
+        code: "ABCD",
+        status: "game",
+        participants: [
+          { id: "p1", name: "Alice", joinedAt: "2026-05-31T00:00:00.000Z" },
+          { id: "p2", name: "Bob", joinedAt: "2026-05-31T00:00:01.000Z" }
+        ],
+        availableWords: ["rocket"],
+        roles: ["drawer", "guesser"],
+        drawerParticipantId: "p1",
+        canvasEvents: [],
+        guessHistory: [],
+        scores: { p1: 0, p2: 0 },
+        secretWord: "rocket"
+      }
+    });
+    mockedApi.drawCanvas.mockResolvedValue({
+      room: {
+        code: "ABCD",
+        status: "game",
+        participants: [
+          { id: "p1", name: "Alice", joinedAt: "2026-05-31T00:00:00.000Z" },
+          { id: "p2", name: "Bob", joinedAt: "2026-05-31T00:00:01.000Z" }
+        ],
+        availableWords: ["rocket"],
+        roles: ["drawer", "guesser"],
+        drawerParticipantId: "p1",
+        canvasEvents: [
+          {
+            id: "event-1",
+            type: "stroke",
+            participantId: "p1",
+            createdAt: "2026-05-31T00:00:02.000Z",
+            stroke: {
+              points: [{ x: 1, y: 2 }],
+              color: "#111827",
+              lineWidth: 4
+            }
+          }
+        ],
+        guessHistory: [],
+        scores: { p1: 0, p2: 0 },
+        secretWord: "rocket"
+      }
+    });
+    mockedApi.clearCanvas.mockResolvedValue({
+      room: {
+        code: "ABCD",
+        status: "game",
+        participants: [
+          { id: "p1", name: "Alice", joinedAt: "2026-05-31T00:00:00.000Z" },
+          { id: "p2", name: "Bob", joinedAt: "2026-05-31T00:00:01.000Z" }
+        ],
+        availableWords: ["rocket"],
+        roles: ["drawer", "guesser"],
+        drawerParticipantId: "p1",
+        canvasEvents: [],
+        guessHistory: [],
+        scores: { p1: 0, p2: 0 },
+        secretWord: "rocket"
+      }
+    });
+    mockedApi.submitGuess.mockResolvedValue({
+      room: {
+        code: "ABCD",
+        status: "game",
+        participants: [
+          { id: "p1", name: "Alice", joinedAt: "2026-05-31T00:00:00.000Z" },
+          { id: "p2", name: "Bob", joinedAt: "2026-05-31T00:00:01.000Z" }
+        ],
+        availableWords: ["rocket"],
+        roles: ["drawer", "guesser"],
+        drawerParticipantId: "p1",
+        canvasEvents: [],
+        guessHistory: [
+          {
+            id: "guess-1",
+            participantId: "p2",
+            rawText: "Rocket",
+            normalizedText: "rocket",
+            isCorrect: true,
+            pointsAwarded: 100,
+            createdAt: "2026-05-31T00:00:03.000Z"
+          }
+        ],
+        scores: { p1: 0, p2: 100 },
+        secretWord: "rocket"
+      }
+    });
+
+    const store = new RoomStore();
+    await store.createRoom("Alice");
+
+    await store.drawCanvas({
+      points: [{ x: 1, y: 2 }],
+      color: "#111827",
+      lineWidth: 4
+    });
+    await store.clearCanvas();
+    await store.submitGuess("Rocket");
+
+    expect(mockedApi.drawCanvas).toHaveBeenCalledWith("ABCD", "p1", {
+      points: [{ x: 1, y: 2 }],
+      color: "#111827",
+      lineWidth: 4
+    });
+    expect(mockedApi.clearCanvas).toHaveBeenCalledWith("ABCD", "p1");
+    expect(mockedApi.submitGuess).toHaveBeenCalledWith("ABCD", "p1", "Rocket");
   });
 });

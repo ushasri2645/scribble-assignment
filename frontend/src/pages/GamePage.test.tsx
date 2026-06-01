@@ -3,6 +3,8 @@ import { act } from "react-dom/test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const navigateMock = vi.fn();
+const enablePollingMock = vi.fn();
+const disablePollingMock = vi.fn();
 
 type GameRoomState = {
   room: {
@@ -12,6 +14,9 @@ type GameRoomState = {
     availableWords: string[];
     roles: Array<"drawer" | "guesser">;
     drawerParticipantId: string;
+    canvasEvents: Array<unknown>;
+    guessHistory: Array<unknown>;
+    scores: Record<string, number>;
     secretWord?: string;
   };
   participantId: string;
@@ -28,6 +33,9 @@ const roomState: GameRoomState = {
     availableWords: [],
     roles: [],
     drawerParticipantId: "p1",
+    canvasEvents: [],
+    guessHistory: [],
+    scores: { p1: 0, p2: 0 },
     secretWord: "rocket"
   },
   participantId: "p2"
@@ -38,7 +46,11 @@ vi.mock("react-router-dom", () => ({
 }));
 
 vi.mock("../state/roomStore", () => ({
-  useRoomState: () => roomState
+  useRoomState: () => roomState,
+  useRoomStore: () => ({
+    enablePolling: enablePollingMock,
+    disablePolling: disablePollingMock
+  })
 }));
 
 import { GamePage } from "./GamePage";
@@ -47,6 +59,8 @@ describe("GamePage", () => {
   beforeEach(() => {
     document.body.innerHTML = "<div id=\"root\"></div>";
     navigateMock.mockReset();
+    enablePollingMock.mockReset();
+    disablePollingMock.mockReset();
   });
 
   it("hides the secret word from guessers", async () => {
@@ -64,6 +78,7 @@ describe("GamePage", () => {
     expect(container.textContent).toContain("Alice");
     expect(container.textContent).toContain("Playing");
     expect(container.textContent).toContain("Hidden from guessers");
+    expect(container.textContent).not.toContain("Submit Guess");
   });
 
   it("shows the secret word to the drawer", async () => {
