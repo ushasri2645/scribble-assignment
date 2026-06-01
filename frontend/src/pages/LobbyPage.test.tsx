@@ -19,6 +19,7 @@ const roomState = {
     availableWords: ["rocket", "pizza"],
     roles: [],
     drawerParticipantId: null,
+    roundPhase: null,
     canvasEvents: [],
     guessHistory: [],
     scores: {}
@@ -63,6 +64,7 @@ describe("LobbyPage", () => {
         availableWords: ["rocket", "pizza"],
         roles: [],
         drawerParticipantId: "p1",
+        roundPhase: "active",
         canvasEvents: [],
         guessHistory: [],
         scores: { p1: 0, p2: 0 },

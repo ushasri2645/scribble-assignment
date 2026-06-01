@@ -8,6 +8,7 @@ vi.mock("../services/api", () => ({
     joinRoom: vi.fn(),
     fetchRoom: vi.fn(),
     startRoom: vi.fn(),
+    restartRoom: vi.fn(),
     drawCanvas: vi.fn(),
     clearCanvas: vi.fn(),
     submitGuess: vi.fn()
@@ -23,6 +24,7 @@ describe("RoomStore", () => {
     mockedApi.joinRoom.mockReset();
     mockedApi.fetchRoom.mockReset();
     mockedApi.startRoom.mockReset();
+    mockedApi.restartRoom.mockReset();
     mockedApi.drawCanvas.mockReset();
     mockedApi.clearCanvas.mockReset();
     mockedApi.submitGuess.mockReset();
@@ -38,6 +40,7 @@ describe("RoomStore", () => {
         availableWords: ["rocket"],
         roles: ["drawer", "guesser"],
         drawerParticipantId: null,
+        roundPhase: null,
         canvasEvents: [],
         guessHistory: [],
         scores: {}
@@ -51,6 +54,7 @@ describe("RoomStore", () => {
         availableWords: ["rocket"],
         roles: ["drawer", "guesser"],
         drawerParticipantId: null,
+        roundPhase: null,
         canvasEvents: [],
         guessHistory: [],
         scores: {}
@@ -82,6 +86,7 @@ describe("RoomStore", () => {
         availableWords: ["rocket"],
         roles: ["drawer", "guesser"],
         drawerParticipantId: null,
+        roundPhase: null,
         canvasEvents: [],
         guessHistory: [],
         scores: {}
@@ -108,6 +113,7 @@ describe("RoomStore", () => {
         availableWords: ["rocket"],
         roles: ["drawer", "guesser"],
         drawerParticipantId: null,
+        roundPhase: null,
         canvasEvents: [],
         guessHistory: [],
         scores: {}
@@ -124,6 +130,7 @@ describe("RoomStore", () => {
         availableWords: ["rocket"],
         roles: ["drawer", "guesser"],
         drawerParticipantId: "p1",
+        roundPhase: "active",
         canvasEvents: [],
         guessHistory: [],
         scores: { p1: 0, p2: 0 },
@@ -154,6 +161,7 @@ describe("RoomStore", () => {
         availableWords: ["rocket"],
         roles: ["drawer", "guesser"],
         drawerParticipantId: "p1",
+        roundPhase: "active",
         canvasEvents: [],
         guessHistory: [],
         scores: { p1: 0, p2: 0 },
@@ -171,6 +179,7 @@ describe("RoomStore", () => {
         availableWords: ["rocket"],
         roles: ["drawer", "guesser"],
         drawerParticipantId: "p1",
+        roundPhase: "active",
         canvasEvents: [
           {
             id: "event-1",
@@ -200,6 +209,7 @@ describe("RoomStore", () => {
         availableWords: ["rocket"],
         roles: ["drawer", "guesser"],
         drawerParticipantId: "p1",
+        roundPhase: "active",
         canvasEvents: [],
         guessHistory: [],
         scores: { p1: 0, p2: 0 },
@@ -217,6 +227,7 @@ describe("RoomStore", () => {
         availableWords: ["rocket"],
         roles: ["drawer", "guesser"],
         drawerParticipantId: "p1",
+        roundPhase: "active",
         canvasEvents: [],
         guessHistory: [
           {
@@ -252,5 +263,53 @@ describe("RoomStore", () => {
     });
     expect(mockedApi.clearCanvas).toHaveBeenCalledWith("ABCD", "p1");
     expect(mockedApi.submitGuess).toHaveBeenCalledWith("ABCD", "p1", "Rocket");
+  });
+
+  it("restarts the current room through the API when requested", async () => {
+    mockedApi.createRoom.mockResolvedValue({
+      participantId: "p1",
+      room: {
+        code: "ABCD",
+        status: "game",
+        participants: [
+          { id: "p1", name: "Alice", joinedAt: "2026-05-31T00:00:00.000Z" },
+          { id: "p2", name: "Bob", joinedAt: "2026-05-31T00:00:01.000Z" }
+        ],
+        availableWords: ["rocket"],
+        roles: ["drawer", "guesser"],
+        drawerParticipantId: "p1",
+        roundPhase: "ended",
+        canvasEvents: [],
+        guessHistory: [],
+        scores: { p1: 0, p2: 100 },
+        secretWord: "rocket"
+      }
+    });
+    mockedApi.restartRoom.mockResolvedValue({
+      room: {
+        code: "ABCD",
+        status: "lobby",
+        participants: [
+          { id: "p1", name: "Alice", joinedAt: "2026-05-31T00:00:00.000Z" },
+          { id: "p2", name: "Bob", joinedAt: "2026-05-31T00:00:01.000Z" }
+        ],
+        availableWords: ["rocket"],
+        roles: ["drawer", "guesser"],
+        drawerParticipantId: null,
+        roundPhase: null,
+        canvasEvents: [],
+        guessHistory: [],
+        scores: {}
+      }
+    });
+
+    const store = new RoomStore();
+    await store.createRoom("Alice");
+
+    const restarted = await store.restartRoom();
+
+    expect(restarted?.status).toBe("lobby");
+    expect(store.getSnapshot().room?.status).toBe("lobby");
+    expect(mockedApi.restartRoom).toHaveBeenCalledWith("ABCD", "p1");
   });
 });
