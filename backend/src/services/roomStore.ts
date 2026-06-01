@@ -52,6 +52,10 @@ function createInitialScores(participants: Participant[]) {
   }, {});
 }
 
+function createRoundDrawer(participants: Participant[]) {
+  return participants[0] ?? null;
+}
+
 function createCanvasEvent(participantId: string, stroke: CanvasStroke): CanvasEvent {
   return {
     id: randomUUID(),
@@ -149,11 +153,15 @@ export function startRoom(code: string, participantId: string, secretWord: strin
     return null;
   }
 
+  if (room.round) {
+    throw new Error("Round is already in progress");
+  }
+
   if (!STARTER_WORDS.includes(secretWord as (typeof STARTER_WORDS)[number])) {
     throw new Error("Secret word must come from the starter list");
   }
 
-  const host = room.participants[0] ?? null;
+  const host = createRoundDrawer(room.participants);
 
   if (!host || host.id !== participantId) {
     throw new Error("Only the host can start the game");
@@ -163,15 +171,13 @@ export function startRoom(code: string, participantId: string, secretWord: strin
     throw new Error("At least 2 players are required to start");
   }
 
-  if (room.status === "game" && room.round) {
-    return cloneRoom(room);
-  }
-
   room.status = "game";
   room.round = {
     drawerParticipantId: host.id,
     secretWord,
+    phase: "active",
     startedAt: now(),
+    endedAt: null,
     canvasEvents: [],
     guessHistory: [],
     scores: createInitialScores(room.participants)
@@ -190,8 +196,28 @@ function assertRoomRound(room: Room) {
   return room.round;
 }
 
-function assertDrawer(room: Room, participantId: string) {
+function assertActiveRound(room: Room) {
   const round = assertRoomRound(room);
+
+  if (round.phase === "ended") {
+    throw new Error("Round has ended");
+  }
+
+  return round;
+}
+
+function assertEndedRound(room: Room) {
+  const round = assertRoomRound(room);
+
+  if (round.phase !== "ended") {
+    throw new Error("Round has not ended");
+  }
+
+  return round;
+}
+
+function assertDrawer(room: Room, participantId: string) {
+  const round = assertActiveRound(room);
 
   if (round.drawerParticipantId !== participantId) {
     throw new Error("Only the drawer can perform this action");
@@ -201,7 +227,7 @@ function assertDrawer(room: Room, participantId: string) {
 }
 
 function assertGuesser(room: Room, participantId: string) {
-  const round = assertRoomRound(room);
+  const round = assertActiveRound(room);
 
   if (round.drawerParticipantId === participantId) {
     throw new Error("The drawer cannot submit guesses");
@@ -270,6 +296,34 @@ export function submitGuess(code: string, participantId: string, guessText: stri
 
   round.guessHistory.push(guess);
   round.scores[participantId] = (round.scores[participantId] ?? 0) + guess.pointsAwarded;
+
+  if (guess.isCorrect) {
+    round.phase = "ended";
+    round.endedAt = now();
+  }
+
+  room.updatedAt = now();
+  rooms.set(room.code, room);
+
+  return cloneRoom(room);
+}
+
+export function restartRoom(code: string, participantId: string) {
+  const room = rooms.get(code);
+
+  if (!room) {
+    return null;
+  }
+
+  assertEndedRound(room);
+  const host = createRoundDrawer(room.participants);
+
+  if (!host || host.id !== participantId) {
+    throw new Error("Only the host can restart the game");
+  }
+
+  room.status = "lobby";
+  room.round = null;
   room.updatedAt = now();
   rooms.set(room.code, room);
 
@@ -278,8 +332,9 @@ export function submitGuess(code: string, participantId: string, guessText: stri
 
 export function toRoomSnapshot(room: Room, viewerParticipantId?: string): RoomSnapshot {
   const drawerParticipantId = room.round?.drawerParticipantId ?? null;
-  const isDrawer = drawerParticipantId !== null && drawerParticipantId === viewerParticipantId;
   const round = room.round;
+  const isDrawer = drawerParticipantId !== null && drawerParticipantId === viewerParticipantId;
+  const isEnded = round?.phase === "ended";
 
   const snapshot: RoomSnapshot = {
     code: room.code,
@@ -288,12 +343,13 @@ export function toRoomSnapshot(room: Room, viewerParticipantId?: string): RoomSn
     availableWords: listWords(),
     roles: [...STARTER_ROLES],
     drawerParticipantId,
+    roundPhase: round?.phase ?? null,
     canvasEvents: round ? round.canvasEvents.map((event) => structuredClone(event)) : [],
     guessHistory: round ? round.guessHistory.map((entry) => ({ ...entry })) : [],
     scores: round ? { ...round.scores } : {}
   };
 
-  if (isDrawer && round) {
+  if (round && (isDrawer || isEnded)) {
     snapshot.secretWord = round.secretWord;
   }
 
