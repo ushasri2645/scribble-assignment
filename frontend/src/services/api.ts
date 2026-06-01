@@ -1,40 +1,10 @@
 export type ParticipantRole = "drawer" | "guesser";
 export type RoomStatus = "lobby" | "game";
-export type CanvasEventType = "stroke" | "clear";
 
 export interface Participant {
   id: string;
   name: string;
   joinedAt: string;
-}
-
-export interface CanvasPoint {
-  x: number;
-  y: number;
-}
-
-export interface CanvasStroke {
-  points: CanvasPoint[];
-  color: string;
-  lineWidth: number;
-}
-
-export interface CanvasEvent {
-  id: string;
-  type: CanvasEventType;
-  participantId: string;
-  createdAt: string;
-  stroke?: CanvasStroke;
-}
-
-export interface GuessEntry {
-  id: string;
-  participantId: string;
-  rawText: string;
-  normalizedText: string;
-  isCorrect: boolean;
-  pointsAwarded: 0 | 100;
-  createdAt: string;
 }
 
 export interface RoomSnapshot {
@@ -44,9 +14,6 @@ export interface RoomSnapshot {
   availableWords: string[];
   roles: ParticipantRole[];
   drawerParticipantId: string | null;
-  canvasEvents: CanvasEvent[];
-  guessHistory: GuessEntry[];
-  scores: Record<string, number>;
   secretWord?: string;
 }
 
@@ -94,24 +61,6 @@ export const api = {
     return request<{ room: RoomSnapshot }>(`/rooms/${encodeURIComponent(code)}/start`, {
       method: "POST",
       body: JSON.stringify({ participantId, secretWord })
-    });
-  },
-  drawCanvas(code: string, participantId: string, stroke: CanvasStroke) {
-    return request<{ room: RoomSnapshot }>(`/rooms/${encodeURIComponent(code)}/draw`, {
-      method: "POST",
-      body: JSON.stringify({ participantId, stroke })
-    });
-  },
-  clearCanvas(code: string, participantId: string) {
-    return request<{ room: RoomSnapshot }>(`/rooms/${encodeURIComponent(code)}/clear`, {
-      method: "POST",
-      body: JSON.stringify({ participantId })
-    });
-  },
-  submitGuess(code: string, participantId: string, guessText: string) {
-    return request<{ room: RoomSnapshot }>(`/rooms/${encodeURIComponent(code)}/guess`, {
-      method: "POST",
-      body: JSON.stringify({ participantId, guessText })
     });
   },
   fetchRoom(code: string, participantId?: string) {
