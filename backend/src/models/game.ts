@@ -1,6 +1,5 @@
 export type ParticipantRole = "drawer" | "guesser";
 export type RoomStatus = "lobby" | "game";
-export type CanvasEventType = "stroke" | "clear";
 
 export interface Participant {
   id: string;
@@ -8,42 +7,10 @@ export interface Participant {
   joinedAt: string;
 }
 
-export interface CanvasPoint {
-  x: number;
-  y: number;
-}
-
-export interface CanvasStroke {
-  points: CanvasPoint[];
-  color: string;
-  lineWidth: number;
-}
-
-export interface CanvasEvent {
-  id: string;
-  type: CanvasEventType;
-  participantId: string;
-  createdAt: string;
-  stroke?: CanvasStroke;
-}
-
-export interface GuessEntry {
-  id: string;
-  participantId: string;
-  rawText: string;
-  normalizedText: string;
-  isCorrect: boolean;
-  pointsAwarded: 0 | 100;
-  createdAt: string;
-}
-
 export interface Round {
   drawerParticipantId: string;
   secretWord: string;
   startedAt: string;
-  canvasEvents: CanvasEvent[];
-  guessHistory: GuessEntry[];
-  scores: Record<string, number>;
 }
 
 export interface Room {
@@ -62,9 +29,6 @@ export interface RoomSnapshot {
   availableWords: string[];
   roles: ParticipantRole[];
   drawerParticipantId: string | null;
-  canvasEvents: CanvasEvent[];
-  guessHistory: GuessEntry[];
-  scores: Record<string, number>;
   secretWord?: string;
 }
 

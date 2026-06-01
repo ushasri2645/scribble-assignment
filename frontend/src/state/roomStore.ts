@@ -161,57 +161,6 @@ export class RoomStore {
     return nextRoom;
   }
 
-  async drawCanvas(stroke: { points: Array<{ x: number; y: number }>; color: string; lineWidth: number }) {
-    const currentRoom = this.state.room;
-    const participantId = this.state.participantId;
-
-    if (!currentRoom || !participantId) {
-      return null;
-    }
-
-    const response = await this.withLoading(() => api.drawCanvas(currentRoom.code, participantId, stroke));
-    this.setState({
-      room: response.room,
-      error: null
-    });
-
-    return response.room;
-  }
-
-  async clearCanvas() {
-    const currentRoom = this.state.room;
-    const participantId = this.state.participantId;
-
-    if (!currentRoom || !participantId) {
-      return null;
-    }
-
-    const response = await this.withLoading(() => api.clearCanvas(currentRoom.code, participantId));
-    this.setState({
-      room: response.room,
-      error: null
-    });
-
-    return response.room;
-  }
-
-  async submitGuess(guessText: string) {
-    const currentRoom = this.state.room;
-    const participantId = this.state.participantId;
-
-    if (!currentRoom || !participantId) {
-      return null;
-    }
-
-    const response = await this.withLoading(() => api.submitGuess(currentRoom.code, participantId, guessText));
-    this.setState({
-      room: response.room,
-      error: null
-    });
-
-    return response.room;
-  }
-
   enablePolling() {
     this.startPolling();
   }
