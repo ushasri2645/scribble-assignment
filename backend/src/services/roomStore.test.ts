@@ -110,6 +110,7 @@ describe("roomStore", () => {
 
   it("clearCanvas resets the canvas history", () => {
     const created = createRoom("Alice");
+    joinRoom(created.room.code, "Bob");
     startRoom(created.room.code, created.participantId, "rocket");
     drawCanvas(created.room.code, created.participantId, {
       points: [{ x: 10, y: 20 }],

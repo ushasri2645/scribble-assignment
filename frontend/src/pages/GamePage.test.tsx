@@ -78,7 +78,7 @@ describe("GamePage", () => {
     expect(container.textContent).toContain("Alice");
     expect(container.textContent).toContain("Playing");
     expect(container.textContent).toContain("Hidden from guessers");
-    expect(container.textContent).not.toContain("Submit Guess");
+    expect(container.textContent).toContain("Submit Guess");
   });
 
   it("shows the secret word to the drawer", async () => {
@@ -90,9 +90,10 @@ describe("GamePage", () => {
     const root = createRoot(container);
 
     await act(async () => {
-      root.render(<GamePage />);
+    root.render(<GamePage />);
     });
 
     expect(container.textContent).toContain("rocket");
+    expect(container.textContent).not.toContain("Submit Guess");
   });
 });
