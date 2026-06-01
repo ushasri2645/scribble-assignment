@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  clearCanvasSchema,
+  drawCanvasSchema,
   createRoomSchema,
   joinRoomSchema,
+  normalizeGuessText,
   roomCodeParamsSchema,
+  submitGuessSchema,
   startRoomSchema
 } from "./schemas.js";
 
@@ -42,5 +46,32 @@ describe("schemas", () => {
 
   it("startRoomSchema rejects words outside the starter list", () => {
     expect(() => startRoomSchema.parse({ participantId: "p1", secretWord: "banana" })).toThrow();
+  });
+
+  it("drawCanvasSchema accepts a valid stroke payload", () => {
+    const result = drawCanvasSchema.parse({
+      participantId: "p1",
+      stroke: {
+        points: [{ x: 1, y: 2 }],
+        color: "#111827",
+        lineWidth: 4
+      }
+    });
+
+    expect(result.stroke.points).toHaveLength(1);
+  });
+
+  it("clearCanvasSchema accepts a participant id", () => {
+    const result = clearCanvasSchema.parse({ participantId: "p1" });
+
+    expect(result.participantId).toBe("p1");
+  });
+
+  it("submitGuessSchema trims and rejects empty guesses", () => {
+    const result = submitGuessSchema.parse({ participantId: "p1", guessText: "  Rocket  " });
+
+    expect(result.guessText).toBe("Rocket");
+    expect(normalizeGuessText("  Rocket  ")).toBe("rocket");
+    expect(() => submitGuessSchema.parse({ participantId: "p1", guessText: "   " })).toThrow("Guess text is required");
   });
 });
