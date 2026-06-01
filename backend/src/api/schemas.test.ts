@@ -6,6 +6,7 @@ import {
   joinRoomSchema,
   normalizeGuessText,
   roomCodeParamsSchema,
+  restartRoomSchema,
   submitGuessSchema,
   startRoomSchema
 } from "./schemas.js";
@@ -46,6 +47,16 @@ describe("schemas", () => {
 
   it("startRoomSchema rejects words outside the starter list", () => {
     expect(() => startRoomSchema.parse({ participantId: "p1", secretWord: "banana" })).toThrow();
+  });
+
+  it("restartRoomSchema accepts a participantId", () => {
+    const result = restartRoomSchema.parse({ participantId: "p1" });
+
+    expect(result.participantId).toBe("p1");
+  });
+
+  it("restartRoomSchema rejects empty participant ids", () => {
+    expect(() => restartRoomSchema.parse({ participantId: "   " })).toThrow("Participant id is required");
   });
 
   it("drawCanvasSchema accepts a valid stroke payload", () => {

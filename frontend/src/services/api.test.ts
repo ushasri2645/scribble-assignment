@@ -19,6 +19,7 @@ describe("api service", () => {
             availableWords: [],
             roles: [],
             drawerParticipantId: null,
+            roundPhase: null,
             canvasEvents: [],
             guessHistory: [],
             scores: {}
@@ -51,6 +52,7 @@ describe("api service", () => {
             availableWords: [],
             roles: [],
             drawerParticipantId: null,
+            roundPhase: null,
             canvasEvents: [],
             guessHistory: [],
             scores: {}
@@ -82,6 +84,7 @@ describe("api service", () => {
             availableWords: [],
             roles: [],
             drawerParticipantId: null,
+            roundPhase: null,
             canvasEvents: [],
             guessHistory: [],
             scores: {}
@@ -110,6 +113,7 @@ describe("api service", () => {
             availableWords: [],
             roles: [],
             drawerParticipantId: "p1",
+            roundPhase: "active",
             canvasEvents: [],
             guessHistory: [],
             scores: {},
@@ -142,6 +146,7 @@ describe("api service", () => {
             availableWords: [],
             roles: [],
             drawerParticipantId: "p1",
+            roundPhase: "active",
             canvasEvents: [],
             guessHistory: [],
             scores: {},
@@ -185,6 +190,7 @@ describe("api service", () => {
             availableWords: [],
             roles: [],
             drawerParticipantId: "p1",
+            roundPhase: "active",
             canvasEvents: [],
             guessHistory: [],
             scores: {},
@@ -217,6 +223,7 @@ describe("api service", () => {
             availableWords: [],
             roles: [],
             drawerParticipantId: "p1",
+            roundPhase: "active",
             canvasEvents: [],
             guessHistory: [],
             scores: {},
@@ -233,6 +240,38 @@ describe("api service", () => {
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ participantId: "p2", guessText: "Rocket" })
+      })
+    );
+  });
+
+  it("restartRoom sends POST to /rooms/:code/restart with participantId", async () => {
+    const mockResponse = {
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          room: {
+            code: "ABCD",
+            status: "lobby",
+            participants: [],
+            availableWords: [],
+            roles: [],
+            drawerParticipantId: null,
+            roundPhase: null,
+            canvasEvents: [],
+            guessHistory: [],
+            scores: {}
+          }
+        })
+    };
+    vi.mocked(fetch).mockResolvedValue(mockResponse as unknown as Response);
+
+    await api.restartRoom("ABCD", "p1");
+
+    expect(fetch).toHaveBeenCalledWith(
+      expect.stringContaining("/rooms/ABCD/restart"),
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ participantId: "p1" })
       })
     );
   });

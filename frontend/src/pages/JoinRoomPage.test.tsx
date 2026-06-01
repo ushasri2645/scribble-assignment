@@ -45,6 +45,7 @@ describe("JoinRoomPage", () => {
         availableWords: [],
         roles: [],
         drawerParticipantId: null,
+        roundPhase: null,
         canvasEvents: [],
         guessHistory: [],
         scores: {}

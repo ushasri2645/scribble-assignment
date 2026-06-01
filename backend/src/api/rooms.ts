@@ -7,6 +7,7 @@ import {
   joinRoomSchema,
   roomCodeParamsSchema,
   roomViewerQuerySchema,
+  restartRoomSchema,
   submitGuessSchema,
   startRoomSchema,
 } from "./schemas.js";
@@ -16,6 +17,7 @@ import {
   drawCanvas,
   getRoom,
   joinRoom,
+  restartRoom,
   startRoom,
   submitGuess,
   toRoomSnapshot
@@ -84,6 +86,11 @@ export function createRoomsRouter() {
         return;
       }
 
+      if (error instanceof Error && error.message === "Round is already in progress") {
+        next(new HttpError(409, error.message));
+        return;
+      }
+
       next(error);
     }
   });
@@ -101,6 +108,11 @@ export function createRoomsRouter() {
       response.json({ room: toRoomSnapshot(room, participantId) });
     } catch (error) {
       if (error instanceof Error && error.message === "No active round") {
+        next(new HttpError(409, error.message));
+        return;
+      }
+
+      if (error instanceof Error && error.message === "Round has ended") {
         next(new HttpError(409, error.message));
         return;
       }
@@ -136,6 +148,11 @@ export function createRoomsRouter() {
         return;
       }
 
+      if (error instanceof Error && error.message === "Round has ended") {
+        next(new HttpError(409, error.message));
+        return;
+      }
+
       if (error instanceof Error && error.message === "Only the drawer can perform this action") {
         next(new HttpError(403, error.message));
         return;
@@ -167,6 +184,11 @@ export function createRoomsRouter() {
         return;
       }
 
+      if (error instanceof Error && error.message === "Round has ended") {
+        next(new HttpError(409, error.message));
+        return;
+      }
+
       if (error instanceof Error && error.message === "The drawer cannot submit guesses") {
         next(new HttpError(403, error.message));
         return;
@@ -179,6 +201,37 @@ export function createRoomsRouter() {
 
       if (error instanceof Error && error.message === "Guess text is required") {
         next(new HttpError(400, error.message));
+        return;
+      }
+
+      next(error);
+    }
+  });
+
+  router.post("/:code/restart", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId } = restartRoomSchema.parse(request.body);
+      const room = restartRoom(code.toUpperCase(), participantId);
+
+      if (!room) {
+        throw new HttpError(404, "Unable to restart room");
+      }
+
+      response.json({ room: toRoomSnapshot(room, participantId) });
+    } catch (error) {
+      if (error instanceof Error && error.message === "No active round") {
+        next(new HttpError(409, error.message));
+        return;
+      }
+
+      if (error instanceof Error && error.message === "Round has not ended") {
+        next(new HttpError(409, error.message));
+        return;
+      }
+
+      if (error instanceof Error && error.message === "Only the host can restart the game") {
+        next(new HttpError(403, error.message));
         return;
       }
 

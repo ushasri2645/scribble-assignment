@@ -212,6 +212,23 @@ export class RoomStore {
     return response.room;
   }
 
+  async restartRoom() {
+    const currentRoom = this.state.room;
+    const participantId = this.state.participantId;
+
+    if (!currentRoom || !participantId) {
+      return null;
+    }
+
+    const response = await this.withLoading(() => api.restartRoom(currentRoom.code, participantId));
+    this.setState({
+      room: response.room,
+      error: null
+    });
+
+    return response.room;
+  }
+
   enablePolling() {
     this.startPolling();
   }
