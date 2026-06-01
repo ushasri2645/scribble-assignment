@@ -1,17 +1,23 @@
 import { Router } from "express";
 import {
   createRoomSchema,
+  clearCanvasSchema,
   HttpError,
+  drawCanvasSchema,
   joinRoomSchema,
   roomCodeParamsSchema,
   roomViewerQuerySchema,
+  submitGuessSchema,
   startRoomSchema,
 } from "./schemas.js";
 import {
   createRoom,
+  clearCanvas,
+  drawCanvas,
   getRoom,
   joinRoom,
   startRoom,
+  submitGuess,
   toRoomSnapshot
 } from "../services/roomStore.js";
 
@@ -74,6 +80,104 @@ export function createRoomsRouter() {
       }
 
       if (error instanceof Error && error.message === "Secret word must come from the starter list") {
+        next(new HttpError(400, error.message));
+        return;
+      }
+
+      next(error);
+    }
+  });
+
+  router.post("/:code/draw", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId, stroke } = drawCanvasSchema.parse(request.body);
+      const room = drawCanvas(code.toUpperCase(), participantId, stroke);
+
+      if (!room) {
+        throw new HttpError(404, "Unable to draw on room");
+      }
+
+      response.json({ room: toRoomSnapshot(room, participantId) });
+    } catch (error) {
+      if (error instanceof Error && error.message === "No active round") {
+        next(new HttpError(409, error.message));
+        return;
+      }
+
+      if (error instanceof Error && error.message === "Only the drawer can perform this action") {
+        next(new HttpError(403, error.message));
+        return;
+      }
+
+      if (error instanceof Error && error.message === "Participant is not in the room") {
+        next(new HttpError(403, error.message));
+        return;
+      }
+
+      next(error);
+    }
+  });
+
+  router.post("/:code/clear", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId } = clearCanvasSchema.parse(request.body);
+      const room = clearCanvas(code.toUpperCase(), participantId);
+
+      if (!room) {
+        throw new HttpError(404, "Unable to clear room");
+      }
+
+      response.json({ room: toRoomSnapshot(room, participantId) });
+    } catch (error) {
+      if (error instanceof Error && error.message === "No active round") {
+        next(new HttpError(409, error.message));
+        return;
+      }
+
+      if (error instanceof Error && error.message === "Only the drawer can perform this action") {
+        next(new HttpError(403, error.message));
+        return;
+      }
+
+      if (error instanceof Error && error.message === "Participant is not in the room") {
+        next(new HttpError(403, error.message));
+        return;
+      }
+
+      next(error);
+    }
+  });
+
+  router.post("/:code/guess", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId, guessText } = submitGuessSchema.parse(request.body);
+      const room = submitGuess(code.toUpperCase(), participantId, guessText);
+
+      if (!room) {
+        throw new HttpError(404, "Unable to submit guess");
+      }
+
+      response.json({ room: toRoomSnapshot(room, participantId) });
+    } catch (error) {
+      if (error instanceof Error && error.message === "No active round") {
+        next(new HttpError(409, error.message));
+        return;
+      }
+
+      if (error instanceof Error && error.message === "The drawer cannot submit guesses") {
+        next(new HttpError(403, error.message));
+        return;
+      }
+
+      if (error instanceof Error && error.message === "Participant is not in the room") {
+        next(new HttpError(403, error.message));
+        return;
+      }
+
+      if (error instanceof Error && error.message === "Guess text is required") {
         next(new HttpError(400, error.message));
         return;
       }
